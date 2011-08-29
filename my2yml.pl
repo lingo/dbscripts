@@ -1,4 +1,4 @@
-#!/opt/local/bin/perl
+#!/usr/bin/perl
 use warnings;
 use strict;
 
@@ -16,7 +16,7 @@ $opt{h} && usage();
 $opt{d} || usage();
 #$opt{f} || usage();
 $opt{H} ||= 'localhost';
-$opt{S} ||= '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock';
+#$opt{S} ||= '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock';
 
 #print Dumper(\%opt);
 my $mydb = DBI->connect("DBI:mysql:database=$opt{d};host=$opt{H};mysql_socket=$opt{S}",

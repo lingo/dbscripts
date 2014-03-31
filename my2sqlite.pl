@@ -36,7 +36,7 @@ my $sqlitedb = DBI->connect("DBI:SQLite:dbname=$opt{s}",
 
 # Get list of tables from MySQL DB
 my $tables = $mydb->selectcol_arrayref(q{ SHOW TABLES });
-print Dumper(\$tables);
+print STDERR Dumper(\$tables);
 
 # Loop through MySQL tables
 for my $table (@$tables) {
@@ -54,12 +54,12 @@ for my $table (@$tables) {
 	# !!Clear SQLite DB table!!
 	$sqlitedb->do(qq{ DELETE FROM "$table" });
 	# Use prepared statement string constructed in previous block
-	print qq{ INSERT INTO "$table" ($cstr) VALUES($vstr) \n};
+	print STDERR qq{ INSERT INTO "$table" ($cstr) VALUES($vstr) \n};
 	my $inStm = $sqlitedb->prepare(qq{ INSERT INTO "$table" ($cstr) VALUES($vstr) });
 	$stm->execute();
 	# Look through all rows, inserting data from MySQL results into SQLite.
 	while (my $row = $stm->fetchrow_hashref()) {	
-		print Dumper(\$row);
+		print STDERR Dumper(\$row);
 		for (my $i=1; $i <= @cols; $i++) {
 			$inStm->bind_param($i, $row->{$cols[$i-1]});
 		}

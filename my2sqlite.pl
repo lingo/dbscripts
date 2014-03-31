@@ -1,4 +1,4 @@
-#!/opt/local/bin/perl
+#!/usr/bin/perl
 use warnings;
 use strict;
 
@@ -20,7 +20,7 @@ $opt{h} && usage();
 $opt{d} || usage();
 $opt{s} || usage();
 $opt{H} ||= 'localhost';
-$opt{S} ||= '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock';
+$opt{S} ||= ''; #'/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock';
 
 #print Dumper(\%opt);
 

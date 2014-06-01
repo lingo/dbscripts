@@ -10,13 +10,13 @@ use Getopt::Std;
 our $uniq = 1;
 our %opt;
 
-getopts('H:u:p:d:f:hS:', \%opt)
+getopts('H:u:p:d:f:hS:T:w:', \%opt)
 	or usage();
 $opt{h} && usage();
 $opt{d} || usage();
 #$opt{f} || usage();
 $opt{H} ||= 'localhost';
-#$opt{S} ||= '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock';
+$opt{S} ||= '';
 
 #print Dumper(\%opt);
 my $mydb = DBI->connect("DBI:mysql:database=$opt{d};host=$opt{H};mysql_socket=$opt{S}",
@@ -24,10 +24,31 @@ my $mydb = DBI->connect("DBI:mysql:database=$opt{d};host=$opt{H};mysql_socket=$o
 			{RaiseError=>1, PrintError=>1}
 		);
 
-my $tables = $mydb->selectcol_arrayref(q{ SHOW TABLES });
+my $tfilter = '';
+if ($opt{T}) {
+	$tfilter = qq| LIKE '$opt{T}' |;
+#print $tfilter;
+}
+
+my %wheres = ();
+if ($opt{w}) {
+	my @whereClauses = split(';', $opt{w});
+	for my $wpair (@whereClauses) {
+		my ($table, $where) = split(':', $wpair);
+		if ($where !~ /where/i) {
+			$where = 'WHERE '. $where;
+		}
+		$wheres{$table} = $where;
+	}
+#print Dumper(\%wheres);
+}
+
+my $tables = $mydb->selectcol_arrayref(qq{ SHOW TABLES $tfilter });
 #print Dumper(\$tables);
 
 for my $table (@$tables) {
+	my $where = $wheres{$table} || '';
+	#print "$table, $where :::: \n";
 	my $cols = $mydb->selectall_hashref(qq{ DESC `$table` }, 'Field');
 	my $vstr = '?,' x scalar keys %$cols;
 	$vstr =~ s/,$//;
@@ -35,11 +56,11 @@ for my $table (@$tables) {
 	my $cstr = join(',', map { qq|"$_"| } @cols);
 	#print Dumper($vstr);
 
-	my $count = $mydb->selectrow_array(qq{ SELECT COUNT(*) FROM `$table` });
+	my $count = $mydb->selectrow_array(qq{ SELECT COUNT(*) FROM `$table` $where });
 	if ($count) {
 		print "\n$table:\n";
 	}
-	my $stm = $mydb->prepare(qq{ SELECT * FROM `$table` ORDER BY ID });
+	my $stm = $mydb->prepare(qq{ SELECT * FROM `$table` $where ORDER BY ID });
 	$stm->execute();
 	while (my $row = $stm->fetchrow_hashref()) {	
 		ydump($table, $row, 4);

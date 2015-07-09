@@ -82,7 +82,7 @@ for my $table (sort keys %foreignKeys) {
 	for my $field (sort keys %{$foreignKeys{$table}}) {
 		my $target = $foreignKeys{$table}->{$field};
 		$keySQL .= qq{
-			ADD FOREIGN KEY (`$field`) REFERENCES (`$target`, 'ID') $ondeleteEtc
+			ADD FOREIGN KEY (`$field`) REFERENCES `$target` (`ID`) $ondeleteEtc
 		}
 	}
 
